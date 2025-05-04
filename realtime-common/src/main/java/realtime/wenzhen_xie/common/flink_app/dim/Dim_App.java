@@ -41,7 +41,7 @@ import java.util.*;
 /**
  * @Package com.xwz.retail.v1.realtime.flink_app.dim.Dim_App
  * @Author  Wenzhen.Xie
- * @Date  2025/4/9 22:17
+ * @Date  2025/4/3 16:17
  * @description: 
 */
 
