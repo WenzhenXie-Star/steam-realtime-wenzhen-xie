@@ -66,6 +66,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T,T> impleme
                         }else{
                             //如果在Redis中没有找到要关联的维度，发送请求到HBase中查找
                             dimJsonObj = HBaseUtil.readDimAsync(hbaseAsyncConn, Constant.HBASE_NAMESPACE,getTableName(),getRowKey(obj));
+                            dimJsonObj = HBaseUtil.readDimAsync(hbaseAsyncConn, Constant.HBASE_NAMESPACE,getTableName(),getRowKey(obj));
                             //将查找到的维度数据放到Redis中缓存起来，方便下次查询使用
                             if(dimJsonObj != null){
                                 System.out.println("~~~从HBase中找到了"+getTableName()+"表的"+getRowKey(obj)+"数据~~~");
