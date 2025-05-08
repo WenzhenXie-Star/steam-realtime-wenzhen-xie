@@ -1,8 +1,8 @@
 package realtime.wenzhen_xie.common.function;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.utils.RedisLuaUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
+import realtime.wenzhen_xie.common.utils.RedisLuaUtils;
 
 
 /**

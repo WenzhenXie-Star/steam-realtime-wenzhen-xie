@@ -1,7 +1,7 @@
 package realtime.wenzhen_xie.common.utils;
 
 
-import static com.xwz.retail.v1.realtime.utils.SiliconFlowApi.generateBadReview;
+import static realtime.wenzhen_xie.common.utils.SiliconFlowApi.generateBadReview;
 
 /**
  * @Package com.stream.utils.CommonGenerateTempLate

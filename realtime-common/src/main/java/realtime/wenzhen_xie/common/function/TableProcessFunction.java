@@ -1,8 +1,6 @@
 package realtime.wenzhen_xie.common.function;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.bean.TableProcessDim;
-import com.xwz.retail.v1.realtime.utils.JdbcUtil;
 import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
@@ -10,6 +8,8 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
+import realtime.wenzhen_xie.common.bean.TableProcessDim;
+import realtime.wenzhen_xie.common.utils.JdbcUtil;
 
 import java.sql.Connection;
 import java.util.*;

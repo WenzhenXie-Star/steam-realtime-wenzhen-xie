@@ -1,14 +1,14 @@
 package realtime.wenzhen_xie.common.function;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.bean.TableProcessDim;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.utils.HBaseUtil;
-import com.xwz.retail.v1.realtime.utils.RedisUtil;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.hadoop.hbase.client.Connection;
+import realtime.wenzhen_xie.common.bean.TableProcessDim;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.utils.HBaseUtil;
+import realtime.wenzhen_xie.common.utils.RedisUtil;
 import redis.clients.jedis.Jedis;
 
 /**

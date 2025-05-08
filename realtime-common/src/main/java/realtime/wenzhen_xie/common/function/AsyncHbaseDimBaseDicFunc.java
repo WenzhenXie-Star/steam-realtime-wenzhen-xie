@@ -3,7 +3,6 @@ package realtime.wenzhen_xie.common.function;
 import avro.shaded.com.google.common.cache.Cache;
 import avro.shaded.com.google.common.cache.CacheBuilder;
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.utils.HbaseUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
@@ -14,6 +13,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.MD5Hash;
+import realtime.wenzhen_xie.common.utils.HbaseUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
