@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @Package com.retailersv1.func.FilterBloomDeduplicatorFunc
+ * @Package realtime.wenzhen_xie.common.function.FilterBloomDeduplicatorFunc
  * @Author zhou.han
  * @Date 2025/3/31 22:25
  * @description: 布隆过滤器

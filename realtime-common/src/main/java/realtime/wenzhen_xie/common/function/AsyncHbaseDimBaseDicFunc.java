@@ -22,9 +22,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Package com.retailersv1.func.AsyncHbaseDimBaseDicFunc
- * @Author zhou.han
- * @Date 2025/3/15 20:47
+ * @Package realtime.wenzhen_xie.common.function.AsyncHbaseDimBaseDicFunc
+ * @Author Wenzhen.Xie
+ * @Date 2025/5/5 20:47
  * @description: Async DimBaseDic
  */
 public class AsyncHbaseDimBaseDicFunc extends RichAsyncFunction<JSONObject,JSONObject> {
@@ -37,7 +37,7 @@ public class AsyncHbaseDimBaseDicFunc extends RichAsyncFunction<JSONObject,JSONO
     @Override
     public void open(Configuration parameters) throws Exception {
         hbaseConn = new HbaseUtils("cdh01:2181,cdh02:2181,cdh03:2181").getConnection();
-        dimTable = hbaseConn.getTable(TableName.valueOf("realtime_v2:dim_base_dic"));
+        dimTable = hbaseConn.getTable(TableName.valueOf("sx_002:dim_base_dic"));
         cache = CacheBuilder.newBuilder()
                 .maximumSize(1000)
                 .expireAfterWrite(10, TimeUnit.MINUTES)

@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * @Package com.xwz.retail.v1.realtime.function.DimAsyncFunction
+ * @Package realtime.wenzhen_xie.common.function.DimAsyncFunction
  * @Author  Wenzhen.Xie
  * @Date  2025/4/23 15:07
  * @description: 

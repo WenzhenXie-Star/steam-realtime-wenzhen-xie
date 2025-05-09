@@ -12,7 +12,7 @@ import realtime.wenzhen_xie.common.utils.RedisUtil;
 import redis.clients.jedis.Jedis;
 
 /**
- * @Package com.xwz.stream.realtime.v1.function.HBaseSinkFunction
+ * @Package realtime.wenzhen_xie.common.function.HBaseSinkFunction
  * @Author Wenzhen.Xie
  * @Date 2025/4/11 9:11
  * @description: HBaseSinkFunction

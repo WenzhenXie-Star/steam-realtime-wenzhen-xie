@@ -6,7 +6,7 @@ import realtime.wenzhen_xie.common.utils.RedisLuaUtils;
 
 
 /**
- * @Package com.retailersv1.func.mapCheckRedisSensitiveWordsFuc
+ * @Package realtime.wenzhen_xie.common.function.mapCheckRedisSensitiveWordsFuc
  * @Author zhou.han
  * @Date 2025/4/1 13:32
  * @description: check sensitive redis lua

@@ -1,7 +1,6 @@
 package realtime.wenzhen_xie.common.flink_app.retailersv1;
 
 import com.alibaba.fastjson.JSONObject;
-import realtime.wenzhen_xie.common.utils.*;
 import lombok.SneakyThrows;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -15,12 +14,13 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
+import realtime.wenzhen_xie.common.utils.*;
 
 import java.time.Duration;
 import java.util.Date;
 
 /**
- * @Package com.xwz.retail.v1.realtime.app.func.DbusTradeCartAddInfo
+ * @Package realtime.wenzhen_xie.common.flink_app.DbusTradeCartAddInfo
  * @Author  Wenzhen.Xie
  * @Date  2025/5/7 10:00
  * @description: 
@@ -46,7 +46,6 @@ public class DbusTradeCartAddInfo {
                 KafkaUtils.buildKafkaSource(
                         kafka_botstrap_servers,
                         kafka_cdc_db_topic,
-                        new Date().toString(),
                         OffsetsInitializer.earliest()
                 ),
                 WatermarkStrategy.<String>forBoundedOutOfOrderness(Duration.ofSeconds(3))

@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * @Package com.stream.common.utils.RedisUtils.java
- * @Author zhou.han
+ * @Author wenzhen_xie
  * @Date 2025/3/29 23:09
  * @description: Lua check redis words
  */

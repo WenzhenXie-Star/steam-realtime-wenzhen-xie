@@ -5,7 +5,7 @@ import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.util.Collector;
 
 /**
- * @Package com.retailersv1.func.IntervalJoinOrderCommentAndOrderInfoFunc
+ * @Package realtime.wenzhen_xie.common.function.IntervalJoinOrderCommentAndOrderInfoFunc
  * @Author zhou.han
  * @Date 2025/3/16 16:28
  * @description: orderComment Join orderInfo Msg

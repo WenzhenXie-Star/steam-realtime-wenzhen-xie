@@ -4,7 +4,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 /**
  * @Package com.stream.utils.PaimonMinioUtils
- * @Author zhou.han
+ * @Author wenzhen_xie
  * @Date 2025/4/7 19:54
  * @description: Paimon connection Minio Utils
  */

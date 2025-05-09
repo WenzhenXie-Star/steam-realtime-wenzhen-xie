@@ -1,12 +1,14 @@
-package realtime.wenzhen_xie.common.utils;
+package realtime.wenzhen_xie.common.function;
 
 
-import static realtime.wenzhen_xie.common.utils.SiliconFlowApi.generateBadReview;
+import realtime.wenzhen_xie.common.utils.ConfigUtils;
+
+import static realtime.wenzhen_xie.common.function.SiliconFlowApi.generateBadReview;
 
 /**
- * @Package com.stream.utils.CommonGenerateTempLate
- * @Author zhou.han
- * @Date 2025/3/16 19:43
+ * @Package realtime.wenzhen_xie.common.function.CommonGenerateTempLate
+ * @Author Wenzhen.Xie
+ * @Date 2025/5/5 20:47
  * @description: TempLate
  */
 public class CommonGenerateTempLate {
@@ -15,7 +17,7 @@ public class CommonGenerateTempLate {
 
     private static final String COMMENT = "差评";
 
-    private static final String API_TOKEN = "sk-pfaasdbkktgnunlvoapothvybwflwdteckwmhakzqbthcgnj";
+    private static final String API_TOKEN = ConfigUtils.getString("silicon.api.token");
 
     public static String GenerateComment(String comment,String productName){
         if (comment.equals(COMMENT)){
@@ -29,5 +31,7 @@ public class CommonGenerateTempLate {
                 API_TOKEN
         );
     }
+
+
 
 }

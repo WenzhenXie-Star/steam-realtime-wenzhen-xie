@@ -12,15 +12,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import realtime.wenzhen_xie.common.constant.Constant;
 
 import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * time: 2021/8/11 10:20 className: KafkaUtils.java
- *
- * @author han.zhou
- * @version 1.0.0
+ * @author Wenzhen.Xie
  */
 public final class KafkaUtils {
 
@@ -79,15 +77,13 @@ public final class KafkaUtils {
         }
     }
 
-    public static KafkaSource<String> buildKafkaSource(String bootServerList,String kafkaTopic,String group,OffsetsInitializer offset){
+    public static KafkaSource<String> buildKafkaSource(String kafkaTopic,String group,OffsetsInitializer offset){
         return KafkaSource.<String>builder()
-                .setBootstrapServers(bootServerList)
+                .setBootstrapServers(Constant.KAFKA_BROKERS)
                 .setTopics(kafkaTopic)
                 .setGroupId(group)
                 .setStartingOffsets(offset)
                 .setValueOnlyDeserializer(new SimpleStringSchema())
-                // 自动发现消费的partition变化
-                .setProperty("flink.partition-discovery.interval-millis",String.valueOf(10 * 1000))
                 .build();
     }
 

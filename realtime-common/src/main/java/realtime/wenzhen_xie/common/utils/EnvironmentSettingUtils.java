@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * 环境参数设置工具类
  * time: 2021/8/25 11:13 className: EnvironmentSettingUtils.java
  *
- * @author han.zhou
+ * @author wenzhen_xie
  * @version 1.0.0
  */
 public final class EnvironmentSettingUtils {
