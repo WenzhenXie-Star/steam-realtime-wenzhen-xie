@@ -2,28 +2,24 @@ package com.xwz.retail.v2.reaktime.app.dwd;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.utils.DateFormatUtil;
-import com.xwz.retail.v1.realtime.utils.FlinkSinkUtil;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.xwz.retail.v2.reaktime.func.FilterBloomDeduplicatorFunc;
+import com.xwz.retail.v2.reaktime.func.IntervalJoinUserInfoLabelProcessFunc;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.RichMapFunction;
-import org.apache.flink.api.common.state.StateTtlConfig;
-import org.apache.flink.api.common.state.ValueState;
-import org.apache.flink.api.common.state.ValueStateDescriptor;
-import org.apache.flink.api.common.time.Time;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SideOutputDataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.util.Collector;
-import org.apache.flink.util.OutputTag;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @Package com.xwz.retail.v1.realtime.app.dwd.DwdBaseLog
@@ -33,13 +29,6 @@ import org.apache.flink.util.OutputTag;
  */
 
 public class DwdBaseDb {
-
-    private static final String User_Info = "user_info";
-    private static final String Base_Category1 = "base_category1";
-    private static final String Base_Category2 = "base_category2";
-    private static final String Base_Category3 = "base_category3";
-    private static final String User_Info_Sup_Msg = "user_info_sup_msg";
-
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -49,172 +38,165 @@ public class DwdBaseDb {
 
         KafkaSource<String> kafkaSource = FlinkSourceUtil.getKafkaSource(Constant.TOPIC_DB, "dwd_db");
 
-        DataStreamSource<String> kafkaStrDS = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka_Source");
-
-//        kafkaStrDS.print();
-
-        OutputTag<String> dirtyData = new OutputTag<String>("dirtyData"){};
-
-        SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaStrDS.process(
-                new ProcessFunction<String, JSONObject>() {
-                    @Override
-                    public void processElement(String jsonStr, ProcessFunction<String, JSONObject>.Context ctx, Collector<JSONObject> out) {
-                        try {
-                            JSONObject jsonObj = JSON.parseObject(jsonStr);
-                            out.collect(jsonObj);
-                        } catch (Exception e) {
-                            ctx.output(dirtyData, jsonStr);
-                        }
-                    }
-                }
-        );
-
-        jsonObjDS.print();
-
-        SideOutputDataStream<String> dirtyDS = jsonObjDS.getSideOutput(dirtyData);
-
-        dirtyDS.sinkTo(FlinkSinkUtil.getKafkaSink("dirty_data"));
-
-        KeyedStream<JSONObject, String> keyedDS = jsonObjDS.keyBy(jsonObj -> jsonObj.getJSONObject("common").getString("mid"));
-
-        SingleOutputStreamOperator<JSONObject> fixedDS = keyedDS.map(
-                new RichMapFunction<JSONObject, JSONObject>() {
-                    private ValueState<String> lastVisitDateState;
-
-                    @Override
-                    public void open(Configuration parameters) {
-                        ValueStateDescriptor<String> valueStateDescriptor =
-                                new ValueStateDescriptor<>("lastVisitDateState", String.class);
-
-                        valueStateDescriptor.enableTimeToLive(StateTtlConfig.newBuilder(Time.seconds(10))
-                                .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
-                                .build());
-
-                        lastVisitDateState = getRuntimeContext().getState(valueStateDescriptor);
-                    }
-
-                    @Override
-                    public JSONObject map(JSONObject jsonObj) throws Exception {
-                        String isNew = jsonObj.getJSONObject("common").getString("is_new");
-                        String lastVisitDate = lastVisitDateState.value();
-                        Long ts = jsonObj.getLong("ts");
-                        String curVisitDate = DateFormatUtil.tsToDate(ts);
-
-                        if ("1".equals(isNew)) {
-                            if (StringUtils.isEmpty(lastVisitDate)) {
-                                lastVisitDateState.update(curVisitDate);
-                            } else {
-                                if (!lastVisitDate.equals(curVisitDate)) {
-                                    isNew = "0";
-                                    jsonObj.getJSONObject("common").put("is_new", isNew);
+        SingleOutputStreamOperator<String> kafkaStrDS = env.fromSource(kafkaSource,
+                WatermarkStrategy.<String>forBoundedOutOfOrderness(Duration.ofSeconds(3))
+                        .withTimestampAssigner((event,timestamp) -> {
+                            JSONObject jsonObject = JSONObject.parseObject(event);
+                            if (event != null && jsonObject.containsKey("ts_ms")){
+                                try {
+                                    return JSONObject.parseObject(event).getLong("ts_ms");
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                    System.err.println("Failed to parse event as JSON or get ts_ms: " + event);
+                                    return 0L;
                                 }
                             }
-                        } else {
-                            if (StringUtils.isEmpty(lastVisitDate)) {
-                                String yesterDay = DateFormatUtil.tsToDate(ts - 24 * 60 * 60 * 1000);
-                                lastVisitDateState.update(yesterDay);
+                            return 0L;
+                        }
+                ), "Kafka_cdc_Source"
+                ).uid("Kafka_cdc_Source")
+                .name("Kafka_cdc_Source");
+//        kafkaStrDS.print();
+
+
+        SingleOutputStreamOperator<JSONObject> dataConvertJsonDs = kafkaStrDS.map(JSON::parseObject)
+                .uid("convert json")
+                .name("convert json");
+
+        SingleOutputStreamOperator<JSONObject> userInfoDs = dataConvertJsonDs.filter(data -> data.getJSONObject("source").getString("table").equals("user_info"))
+                .uid("filter kafka user info")
+                .name("filter kafka user info");
+
+        SingleOutputStreamOperator<JSONObject> finalUserInfoDs = userInfoDs.map( new RichMapFunction<JSONObject, JSONObject>() {
+            @Override
+            public JSONObject map(JSONObject jsonObject){
+                JSONObject after = jsonObject.getJSONObject("after");
+                if (after != null && after.containsKey("birthday")) {
+                    Integer epochDay = after.getInteger("birthday");
+                    if (epochDay != null) {
+                        LocalDate date = LocalDate.ofEpochDay(epochDay);
+                        after.put("birthday", date.format(DateTimeFormatter.ISO_DATE));
+                    }
+                }
+                return jsonObject;
+            }
+        });
+
+//        finalUserInfoDs.print();
+
+
+        SingleOutputStreamOperator<JSONObject> userInfoSupDs = dataConvertJsonDs.filter(data -> data.getJSONObject("source").getString("table").equals("user_info_sup_msg"))
+                .uid("filter kafka user info sup")
+                .name("filter kafka user info sup");
+
+        SingleOutputStreamOperator<JSONObject> mapUserInfoDs = finalUserInfoDs.map(new RichMapFunction<JSONObject, JSONObject>() {
+                    @Override
+                    public JSONObject map(JSONObject jsonObject){
+                        JSONObject result = new JSONObject();
+                        if (jsonObject.containsKey("after") && jsonObject.getJSONObject("after") != null) {
+                            JSONObject after = jsonObject.getJSONObject("after");
+                            result.put("uid", after.getString("id"));
+                            result.put("uname", after.getString("name"));
+                            result.put("user_level", after.getString("user_level"));
+                            result.put("login_name", after.getString("login_name"));
+                            result.put("phone_num", after.getString("phone_num"));
+                            result.put("email", after.getString("email"));
+                            result.put("gender", after.getString("gender") != null ? after.getString("gender") : "home");
+                            result.put("birthday", after.getString("birthday"));
+                            result.put("ts_ms", jsonObject.getLongValue("ts_ms"));
+                            String birthdayStr = after.getString("birthday");
+                            if (birthdayStr != null && !birthdayStr.isEmpty()) {
+                                try {
+                                    LocalDate birthday = LocalDate.parse(birthdayStr, DateTimeFormatter.ISO_DATE);
+                                    LocalDate currentDate = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+                                    int age = calculateAge(birthday, currentDate);
+                                    int decade = birthday.getYear() / 10 * 10;
+                                    result.put("decade", decade);
+                                    result.put("age", age);
+                                    String zodiac = getZodiacSign(birthday);
+                                    result.put("zodiac_sign", zodiac);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 
-                        return jsonObj;
+                        return result;
                     }
-                }
-        );
+                }).uid("map userInfo ds")
+                .name("map userInfo ds");
 
-        //定义侧输出流标签
-//        OutputTag<String> errTag = new OutputTag<String>("errTag") {};
-//        OutputTag<String> startTag = new OutputTag<String>("startTag") {};
-//        OutputTag<String> displayTag = new OutputTag<String>("displayTag") {};
-//        OutputTag<String> actionTag = new OutputTag<String>("actionTag") {};
-//        //分流
-//        SingleOutputStreamOperator<String> pageDS = fixedDS.process(
-//                new ProcessFunction<JSONObject, String>() {
-//                    @Override
-//                    public void processElement(JSONObject jsonObj, ProcessFunction<JSONObject, String>.Context ctx, Collector<String> out) {
-//                        //~~~错误日志~~~
-//                        JSONObject errJsonObj = jsonObj.getJSONObject("err");
-//                        if (errJsonObj != null) {
-//                            ctx.output(errTag, jsonObj.toJSONString());
-//                            jsonObj.remove("err");
-//                        }
-//
-//                        JSONObject startJsonObj = jsonObj.getJSONObject("start");
-//                        if (startJsonObj != null) {
-//                            ctx.output(startTag, jsonObj.toJSONString());
-//                        } else {
-//                            //~~~页面日志~~~
-//                            JSONObject commonJsonObj = jsonObj.getJSONObject("common");
-//                            JSONObject pageJsonObj = jsonObj.getJSONObject("page");
-//                            Long ts = jsonObj.getLong("ts");
-//                            //~~~曝光日志~~~
-//                            JSONArray displayArr = jsonObj.getJSONArray("displays");
-//                            if (displayArr != null && displayArr.size() > 0) {
-//                                for (int i = 0; i < displayArr.size(); i++) {
-//                                    JSONObject dispalyJsonObj = displayArr.getJSONObject(i);
-//                                    JSONObject newDisplayJsonObj = new JSONObject();
-//                                    newDisplayJsonObj.put("common", commonJsonObj);
-//                                    newDisplayJsonObj.put("page", pageJsonObj);
-//                                    newDisplayJsonObj.put("display", dispalyJsonObj);
-//                                    newDisplayJsonObj.put("ts", ts);
-//                                    ctx.output(displayTag, newDisplayJsonObj.toJSONString());
-//                                }
-//                                jsonObj.remove("displays");
-//                            }
-//
-//                            //~~~动作日志~~~
-//                            JSONArray actionArr = jsonObj.getJSONArray("actions");
-//                            if (actionArr != null && actionArr.size() > 0) {
-//                                for (int i = 0; i < actionArr.size(); i++) {
-//                                    JSONObject actionJsonObj = actionArr.getJSONObject(i);
-//                                    JSONObject newActionJsonObj = new JSONObject();
-//                                    newActionJsonObj.put("common", commonJsonObj);
-//                                    newActionJsonObj.put("page", pageJsonObj);
-//                                    newActionJsonObj.put("action", actionJsonObj);
-//                                    ctx.output(actionTag, newActionJsonObj.toJSONString());
-//                                }
-//                                jsonObj.remove("actions");
-//                            }
-//
-//                            out.collect(jsonObj.toJSONString());
-//                        }
-//                    }
-//                }
-//        );
-//
-//        SideOutputDataStream<String> errDS = pageDS.getSideOutput(errTag);
-//        SideOutputDataStream<String> startDS = pageDS.getSideOutput(startTag);
-//        SideOutputDataStream<String> displayDS = pageDS.getSideOutput(displayTag);
-//        SideOutputDataStream<String> actionDS = pageDS.getSideOutput(actionTag);
-//        pageDS.print("页面:");
-//        errDS.print("错误:");
-//        startDS.print("启动:");
-//        displayDS.print("曝光:");
-//        actionDS.print("动作:");
-//
-//        Map<String, DataStream<String>> streamMap = new HashMap<>();
-//        streamMap.put(ERR,errDS);
-//        streamMap.put(START,startDS);
-//        streamMap.put(DISPLAY,displayDS);
-//        streamMap.put(ACTION,actionDS);
-//        streamMap.put(PAGE,pageDS);
-//
-//        streamMap
-//                .get(PAGE)
-//                .sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_PAGE));
-//        streamMap
-//                .get(ERR)
-//                .sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_ERR));
-//        streamMap
-//                .get(START)
-//                .sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_START));
-//        streamMap
-//                .get(DISPLAY)
-//                .sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_DISPLAY));
-//        streamMap
-//                .get(ACTION)
-//                .sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_ACTION));
-//
-        env.execute("dwd_db");
+//        mapUserInfoDs.print();
+
+
+        SingleOutputStreamOperator<JSONObject> mapUserInfoSupDs = userInfoSupDs.map(new RichMapFunction<JSONObject, JSONObject>() {
+                    @Override
+                    public JSONObject map(JSONObject jsonObject) {
+                        JSONObject result = new JSONObject();
+                        if (jsonObject.containsKey("after") && jsonObject.getJSONObject("after") != null) {
+                            JSONObject after = jsonObject.getJSONObject("after");
+                            result.put("uid", after.getString("uid"));
+                            result.put("unit_height", after.getString("unit_height"));
+                            result.put("create_ts", after.getLong("create_ts"));
+                            result.put("weight", after.getString("weight"));
+                            result.put("unit_weight", after.getString("unit_weight"));
+                            result.put("height", after.getString("height"));
+                            result.put("ts_ms", jsonObject.getLong("ts_ms"));
+                        }
+                        return result;
+                    }
+                }).uid("sup userinfo sup")
+                .name("sup userinfo sup");
+
+//        mapUserInfoSupDs.print();
+
+        SingleOutputStreamOperator<JSONObject> finalUserinfoDs = mapUserInfoDs.filter(data -> data.containsKey("uid") && !data.getString("uid").isEmpty());
+        SingleOutputStreamOperator<JSONObject> finalUserinfoSupDs = mapUserInfoSupDs.filter(data -> data.containsKey("uid") && !data.getString("uid").isEmpty());
+
+        KeyedStream<JSONObject, String> keyedStreamUserInfoDs = finalUserinfoDs.keyBy(data -> data.getString("uid"));
+        KeyedStream<JSONObject, String> keyedStreamUserInfoSupDs = finalUserinfoSupDs.keyBy(data -> data.getString("uid"));
+
+        SingleOutputStreamOperator<JSONObject> processIntervalJoinUserInfo6BaseMessageDs = keyedStreamUserInfoDs.intervalJoin(keyedStreamUserInfoSupDs)
+                .between(Time.minutes(-5), Time.minutes(5))
+                .process(new IntervalJoinUserInfoLabelProcessFunc());
+
+        processIntervalJoinUserInfo6BaseMessageDs.print();
+
+
+          SingleOutputStreamOperator<JSONObject> objectSingleOutputStreamOperator = processIntervalJoinUserInfo6BaseMessageDs
+                .keyBy(json -> json.getString("uid"))
+                .filter(new FilterBloomDeduplicatorFunc(100000, 0.01));
+
+        objectSingleOutputStreamOperator.print();
+
+        env.execute("DbusUserInfo6BaseLabel");
+    }
+
+
+    private static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+        return Period.between(birthDate, currentDate).getYears();
+    }
+
+    private static String getZodiacSign(LocalDate birthDate) {
+        int month = birthDate.getMonthValue();
+        int day = birthDate.getDayOfMonth();
+
+        // 星座日期范围定义
+        if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "摩羯座";
+        else if (month == 1 || month == 2 && day <= 18) return "水瓶座";
+        else if (month == 2 || month == 3 && day <= 20) return "双鱼座";
+        else if (month == 3 || month == 4 && day <= 19) return "白羊座";
+        else if (month == 4 || month == 5 && day <= 20) return "金牛座";
+        else if (month == 5 || month == 6 && day <= 21) return "双子座";
+        else if (month == 6 || month == 7 && day <= 22) return "巨蟹座";
+        else if (month == 7 || month == 8 && day <= 22) return "狮子座";
+        else if (month == 8 || month == 9 && day <= 22) return "处女座";
+        else if (month == 9 || month == 10 && day <= 23) return "天秤座";
+        else if (month == 10 || month == 11 && day <= 22) return "天蝎座";
+        else return "射手座";
+
+
+
     }
 
 

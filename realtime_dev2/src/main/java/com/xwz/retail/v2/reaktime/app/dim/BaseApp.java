@@ -3,12 +3,6 @@ package com.xwz.retail.v2.reaktime.app.dim;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.xwz.retail.v1.realtime.bean.TableProcessDim;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.function.HBaseSinkFunction;
-import com.xwz.retail.v1.realtime.function.TableProcessFunction;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
-import com.xwz.retail.v1.realtime.utils.HBaseUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -25,6 +19,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.hadoop.hbase.client.Connection;
+import realtime.wenzhen_xie.common.bean.TableProcessDim;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.function.HBaseSinkFunction;
+import realtime.wenzhen_xie.common.function.TableProcessFunction;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
+import realtime.wenzhen_xie.common.utils.HBaseUtil;
 
 /**
  * @Package com.xwz.retail.v1.realtime.app.dim.BaseApp;

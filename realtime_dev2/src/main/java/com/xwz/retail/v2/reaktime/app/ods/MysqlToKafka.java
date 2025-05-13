@@ -1,12 +1,12 @@
 package com.xwz.retail.v2.reaktime.app.ods;
 
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.xwz.retail.v1.realtime.utils.FlinkSinkUtil;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import realtime.wenzhen_xie.common.utils.FlinkSinkUtil;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
 
 
 /**
@@ -27,7 +27,7 @@ public class MysqlToKafka {
 
         mySQLSource.print();
 
-        KafkaSink<String> topic_db = FlinkSinkUtil.getKafkaSink("Damopan_topic_db");
+       KafkaSink<String> topic_db = FlinkSinkUtil.getKafkaSink("Damopan_topic_db");
 
         mySQLSource.sinkTo(topic_db);
 
