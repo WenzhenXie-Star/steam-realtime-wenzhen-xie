@@ -11,6 +11,7 @@
     <modules>
         <module>realtime-common</module>
         <module>realtime_dev2</module>
+        <module>realtime_dev3</module>
     </modules>
 
     <properties>
