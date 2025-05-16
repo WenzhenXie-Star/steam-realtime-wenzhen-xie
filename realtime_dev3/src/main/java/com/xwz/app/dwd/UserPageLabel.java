@@ -1,15 +1,12 @@
 package com.xwz.app.dwd;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.utils.FlinkSinkUtil;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
-import com.xwz.retail.v2.reaktime.app.utils.JdbcUtils;
+import com.xwz.func.MapPageInfoFacility;
+import com.xwz.func.ProcessFilterRepeatTsData;
 import com.xwz.retail.v2.reaktime.bean.DimBaseCategory;
 import com.xwz.retail.v2.reaktime.func.AggregateUserDataProcessFunction;
 import com.xwz.retail.v2.reaktime.func.MapDeviceAndSearchMarkModelFunc;
-import com.xwz.retail.v2.reaktime.func.MapPageInfoFacility;
-import com.xwz.retail.v2.reaktime.func.ProcessFilterRepeatTsData;
+import com.xwz.utils.JdbcUtils;
 import lombok.SneakyThrows;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -18,6 +15,9 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.utils.FlinkSinkUtil;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
 
 import java.sql.Connection;
 import java.time.Duration;

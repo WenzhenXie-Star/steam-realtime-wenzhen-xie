@@ -6,7 +6,8 @@ import com.xwz.bean.DimCategoryCompare;
 import com.xwz.utils.JdbcUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
-import realtime.wenzhen_xie.common.*;
+import realtime.wenzhen_xie.common.constant.Constant;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;

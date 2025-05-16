@@ -1,7 +1,7 @@
 package com.xwz.func;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v2.reaktime.bean.DimBaseCategory;
+import com.xwz.bean.DimBaseCategory;
 import org.apache.flink.api.common.functions.RichMapFunction;
 
 import java.math.BigDecimal;

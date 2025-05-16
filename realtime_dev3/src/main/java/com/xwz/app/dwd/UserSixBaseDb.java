@@ -2,9 +2,7 @@ package com.xwz.app.dwd;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
-import com.xwz.retail.v2.reaktime.func.IntervalJoinUserInfoLabelProcessFunc;
+import com.xwz.func.IntervalJoinUserInfoLabelProcessFunc;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -13,6 +11,8 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
 
 import java.time.Duration;
 import java.time.LocalDate;

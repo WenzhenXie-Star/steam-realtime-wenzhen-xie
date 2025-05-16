@@ -1,12 +1,9 @@
 package com.xwz.app.dwd;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xwz.retail.v1.realtime.constant.Constant;
-import com.xwz.retail.v1.realtime.utils.FlinkSinkUtil;
-import com.xwz.retail.v1.realtime.utils.FlinkSourceUtil;
-import com.xwz.retail.v2.reaktime.app.utils.JdbcUtils;
-import com.xwz.retail.v2.reaktime.bean.DimBaseCategory;
-import com.xwz.retail.v2.reaktime.func.MapCategoryAndTrademarkAndPriceAndTimeFunc;
+import com.xwz.bean.DimBaseCategory;
+import com.xwz.func.MapCategoryAndTrademarkAndPriceAndTimeFunc;
+import com.xwz.utils.JdbcUtils;
 import lombok.SneakyThrows;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -17,6 +14,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
+import realtime.wenzhen_xie.common.constant.Constant;
+import realtime.wenzhen_xie.common.utils.FlinkSinkUtil;
+import realtime.wenzhen_xie.common.utils.FlinkSourceUtil;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
