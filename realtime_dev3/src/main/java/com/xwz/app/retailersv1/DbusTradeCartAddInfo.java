@@ -14,10 +14,7 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
-import realtime.wenzhen_xie.common.utils.ConfigUtils;
-import realtime.wenzhen_xie.common.utils.EnvironmentSettingUtils;
-import realtime.wenzhen_xie.common.utils.KafkaUtils;
-import realtime.wenzhen_xie.common.utils.PaimonMinioUtils;
+import realtime.wenzhen_xie.common.utils.*;
 
 import java.time.Duration;
 import java.util.Date;
@@ -114,20 +111,20 @@ public class DbusTradeCartAddInfo {
                 Types.STRING
         );
 
-//        SingleOutputStreamOperator<Row> rowDs = fixDs.map((MapFunction<JSONObject, Row>) json -> {
-//            Row row = Row.withNames();
-//            row.setField("ts_ms", json.getLong("ts_ms"));
-//            row.setField("is_ordered", json.getIntValue("is_ordered"));
-//            row.setField("sku_num", json.getIntValue("sku_num"));
-//            row.setField("create_time", json.getLong("create_time"));
-//            row.setField("user_id", json.getString("user_id"));
-//            row.setField("sku_id", json.getIntValue("sku_id"));
-//            row.setField("sku_name", json.getString("sku_name"));
-//            row.setField("id", json.getIntValue("id"));
-//            row.setField("operate_time", json.getLong("operate_time"));
-//            row.setField("ds", json.getString("ds"));
-//            return row;
-//        }).returns(rowTypeInfo);
+        SingleOutputStreamOperator<Row> rowDs = fixDs.map((MapFunction<JSONObject, Row>) json -> {
+            Row row = Row.withNames();
+            row.setField("ts_ms", json.getLong("ts_ms"));
+            row.setField("is_ordered", json.getIntValue("is_ordered"));
+            row.setField("sku_num", json.getIntValue("sku_num"));
+            row.setField("create_time", json.getLong("create_time"));
+            row.setField("user_id", json.getString("user_id"));
+            row.setField("sku_id", json.getIntValue("sku_id"));
+            row.setField("sku_name", json.getString("sku_name"));
+            row.setField("id", json.getIntValue("id"));
+            row.setField("operate_time", json.getLong("operate_time"));
+            row.setField("ds", json.getString("ds"));
+            return row;
+        }).returns(rowTypeInfo);
 
 
         tenv.createTemporaryView("flk_res_cart_info_tle", tenv.fromChangelogStream(rowDs, schema));
