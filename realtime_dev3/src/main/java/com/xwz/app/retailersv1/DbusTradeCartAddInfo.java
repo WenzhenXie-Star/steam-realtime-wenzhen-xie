@@ -72,12 +72,12 @@ public class DbusTradeCartAddInfo {
                 JSONObject resJson = new JSONObject();
                 resJson.put("ts_ms", jsonObject.getLong("ts_ms"));
                 resJson.put("is_ordered", jsonObject.getJSONObject("after").getIntValue("is_ordered"));
-                resJson.put("sku_num", jsonObject.getJSONObject("after").getIntValue("sku_num"));
-                resJson.put("create_time", jsonObject.getJSONObject("after").getLong("create_time"));
-                resJson.put("user_id", jsonObject.getJSONObject("after").getString("user_id"));
-                resJson.put("sku_id", jsonObject.getJSONObject("after").getIntValue("sku_id"));
-                resJson.put("sku_name", jsonObject.getJSONObject("after").getString("sku_name"));
-                resJson.put("id", jsonObject.getJSONObject("after").getIntValue("id"));
+//                resJson.put("sku_num", jsonObject.getJSONObject("after").getIntValue("sku_num"));
+//                resJson.put("create_time", jsonObject.getJSONObject("after").getLong("create_time"));
+//                resJson.put("user_id", jsonObject.getJSONObject("after").getString("user_id"));
+//                resJson.put("sku_id", jsonObject.getJSONObject("after").getIntValue("sku_id"));
+//                resJson.put("sku_name", jsonObject.getJSONObject("after").getString("sku_name"));
+//                resJson.put("id", jsonObject.getJSONObject("after").getIntValue("id"));
                 resJson.put("operate_time", jsonObject.getJSONObject("after").getLong("operate_time"));
                 resJson.put("ds", DateTimeUtils.format(new Date(jsonObject.getLong("ts_ms")), "yyyyMMdd"));
                 return resJson;
